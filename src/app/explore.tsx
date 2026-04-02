@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import React from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppScrollView } from '@/components/app-scroll';
 import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -34,7 +35,7 @@ export default function TabTwoScreen() {
   });
 
   return (
-    <ScrollView
+    <AppScrollView
       style={[styles.scrollView, { backgroundColor: theme.background }]}
       contentInset={insets}
       contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
@@ -122,7 +123,7 @@ export default function TabTwoScreen() {
         </ThemedView>
         {Platform.OS === 'web' && <WebBadge />}
       </ThemedView>
-    </ScrollView>
+    </AppScrollView>
   );
 }
 
