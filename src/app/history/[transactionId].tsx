@@ -11,14 +11,33 @@ import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHistory } from '@/context/history-context';
 import { useTheme } from '@/hooks/use-theme';
 
+function normalizeTransactionId(transactionId: string | string[] | undefined) {
+  if (typeof transactionId !== 'string') {
+    return '';
+  }
+
+  return transactionId.trim().toUpperCase();
+}
+
+function formatPurchaseDate(value: string) {
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Date unavailable';
+  }
+
+  return parsedDate.toLocaleString();
+}
+
 export default function TransactionDetailScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { transactionId } = useLocalSearchParams<{ transactionId: string }>();
   const { getEntryByTransactionId } = useHistory();
-  const entry = getEntryByTransactionId(transactionId ?? '');
+  const normalizedTransactionId = normalizeTransactionId(transactionId);
+  const entry = getEntryByTransactionId(normalizedTransactionId);
 
-  if (!entry) {
+  if (!normalizedTransactionId || !entry) {
     return (
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
@@ -35,10 +54,12 @@ export default function TransactionDetailScreen() {
             <Animated.View entering={FadeInDown.duration(420).delay(140)}>
               <ThemedView type="card" style={[styles.emptyState, { borderColor: theme.border }]}>
                 <ThemedText type="subtitle" style={styles.emptyTitle}>
-                  Transaction not found
+                  {!normalizedTransactionId ? 'Invalid transaction ID' : 'Transaction not found'}
                 </ThemedText>
                 <ThemedText themeColor="textSecondary" style={styles.emptyCopy}>
-                  This transaction may no longer be available in the current session.
+                  {!normalizedTransactionId
+                    ? 'Open this page from the history list to view a valid transaction.'
+                    : 'This transaction may no longer be available in the current session.'}
                 </ThemedText>
                 <Pressable
                   onPress={() => router.push('/history')}
@@ -55,7 +76,7 @@ export default function TransactionDetailScreen() {
     );
   }
 
-  const purchasedAt = new Date(entry.purchasedAt).toLocaleString();
+  const purchasedAt = formatPurchaseDate(entry.purchasedAt);
 
   return (
     <ThemedView style={styles.container}>

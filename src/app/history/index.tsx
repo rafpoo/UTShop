@@ -13,6 +13,16 @@ import { useTheme } from '@/hooks/use-theme';
 
 type SortDirection = 'desc' | 'asc';
 
+function formatPurchaseDate(value: string) {
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Date unavailable';
+  }
+
+  return parsedDate.toLocaleString();
+}
+
 function sortEntries(entries: HistoryEntry[], direction: SortDirection) {
   return [...entries].sort((left, right) =>
     direction === 'asc'
@@ -133,7 +143,7 @@ export default function HistoryScreen() {
               ) : (
                 <View style={styles.list}>
                   {filteredEntries.map((entry, index) => {
-                    const purchasedAt = new Date(entry.purchasedAt).toLocaleString();
+                    const purchasedAt = formatPurchaseDate(entry.purchasedAt);
                     const itemCount = entry.items.reduce((sum, item) => sum + item.quantity, 0);
 
                     return (

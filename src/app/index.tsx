@@ -19,6 +19,7 @@ import { useTheme } from '@/hooks/use-theme';
 export default function HomeScreen() {
   const { getFeaturedProducts } = useProducts();
   const products = getFeaturedProducts();
+  const featuredProducts = products.slice(0, 6);
   const theme = useTheme();
   const { cartIds, addToCartFrom } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -57,7 +58,7 @@ export default function HomeScreen() {
           <Animated.View
             key={`swiper-${animationSeed}`}
             entering={FadeInDown.duration(450).delay(baseDelay * 2)}>
-            <ProductSwiper products={products} />
+            <ProductSwiper products={featuredProducts} />
           </Animated.View>
 
           <Animated.View

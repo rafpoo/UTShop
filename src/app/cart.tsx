@@ -28,8 +28,17 @@ export default function CartScreen() {
   const { addEntry } = useHistory();
   const printProgress = useSharedValue(0);
   const [animationSeed, setAnimationSeed] = React.useState(0);
+  const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
 
   const cartProducts = products.filter((product) => cartIds.includes(product.id));
+  const checkoutItems = cartProducts
+    .map((product) => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: getQuantity(product.id),
+    }))
+    .filter((item) => item.quantity > 0 && Number.isFinite(item.price));
   const total = cartProducts.reduce((sum, product) => sum + product.price * getQuantity(product.id), 0);
 
   React.useEffect(() => {
@@ -54,21 +63,22 @@ export default function CartScreen() {
   }));
 
   const handleCheckout = () => {
-    if (cartProducts.length === 0) {
+    if (checkoutItems.length === 0 || !Number.isFinite(total) || total <= 0) {
+      setCheckoutError('Your cart is missing valid items. Please review it and try again.');
       return;
     }
 
-    addEntry({
-      items: cartProducts.map((product) => ({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: getQuantity(product.id),
-      })),
-      total,
-    });
-    clearCart();
-    router.push('/history');
+    try {
+      setCheckoutError(null);
+      addEntry({
+        items: checkoutItems,
+        total,
+      });
+      clearCart();
+      router.push('/history');
+    } catch (_error) {
+      setCheckoutError('Checkout could not be completed right now. Please try again.');
+    }
   };
 
   return (
@@ -222,6 +232,13 @@ export default function CartScreen() {
                       <ThemedText themeColor="textSecondary" style={styles.summaryCopy}>
                         Checkout clears the cart and stores the transaction in your history.
                       </ThemedText>
+                      {checkoutError ? (
+                        <ThemedView
+                          type="cardAlt"
+                          style={[styles.errorBanner, { borderColor: theme.badge }]}>
+                          <ThemedText type="smallBold">{checkoutError}</ThemedText>
+                        </ThemedView>
+                      ) : null}
                       <Pressable
                         accessibilityLabel="Checkout cart"
                         onPress={handleCheckout}
@@ -431,6 +448,12 @@ const styles = StyleSheet.create({
   },
   summaryCopy: {
     lineHeight: 20,
+  },
+  errorBanner: {
+    borderWidth: 1,
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.two,
   },
   checkoutButton: {
     borderRadius: Spacing.three,
