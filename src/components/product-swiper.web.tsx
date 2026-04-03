@@ -6,6 +6,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { Product } from '@/types/product';
 
+const WebScrollHost = View as React.ComponentType<any>;
+const webScrollStyle = {
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  scrollSnapType: 'x mandatory',
+  scrollBehavior: 'smooth',
+} as const;
+
 interface ProductSwiperProps {
   products: Product[];
 }
@@ -63,15 +71,15 @@ export function ProductSwiper({ products }: ProductSwiperProps) {
 
   return (
     <View style={styles.container}>
-      <View
+      <WebScrollHost
         ref={scrollRef}
         onScroll={handleScroll}
-        style={styles.scrollView}
+        style={[styles.scrollView, webScrollStyle]}
         onMouseEnter={clearAutoplay}
         onMouseLeave={startAutoplay}>
         <View style={styles.track}>
           {products.map((product) => (
-            <View key={product.id} style={styles.slide}>
+            <View key={product.id} style={[styles.slide, { scrollSnapAlign: 'center' } as any]}>
               <ProductCard
                 name={product.name}
                 description={product.description}
@@ -81,7 +89,7 @@ export function ProductSwiper({ products }: ProductSwiperProps) {
             </View>
           ))}
         </View>
-      </View>
+      </WebScrollHost>
 
       <View style={styles.pagination}>
         {products.map((_, index) => (
@@ -106,10 +114,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    overflowX: 'auto',
-    overflowY: 'hidden',
-    scrollSnapType: 'x mandatory',
-    scrollBehavior: 'smooth',
   },
   track: {
     flexDirection: 'row',
@@ -117,7 +121,6 @@ const styles = StyleSheet.create({
   slide: {
     width: 300,
     justifyContent: 'center',
-    scrollSnapAlign: 'center',
     paddingVertical: Spacing.two,
     marginHorizontal: Spacing.two,
   },

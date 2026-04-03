@@ -1,27 +1,34 @@
-import { Link } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import React from 'react';
-import { Platform, Pressable, StyleSheet, Switch, useWindowDimensions, View } from 'react-native';
+import { Link } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import React from "react";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   FadeIn,
   FadeOut,
-  SlideInLeft,
-  SlideOutLeft,
   interpolate,
   runOnJS,
+  SlideInLeft,
+  SlideOutLeft,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useCart } from '@/context/cart-context';
-import { useThemeMode } from '@/context/theme-mode-context';
-import { useTheme } from '@/hooks/use-theme';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Fonts, Spacing } from "@/constants/theme";
+import { useCart } from "@/context/cart-context";
+import { useThemeMode } from "@/context/theme-mode-context";
+import { useTheme } from "@/hooks/use-theme";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -29,7 +36,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const { width } = useWindowDimensions();
-  const showSidebar = Platform.OS === 'web' ? width >= 900 : width >= 720;
+  const showSidebar = Platform.OS === "web" ? width >= 900 : width >= 720;
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const { count, lastAddedAt, lastAddSource } = useCart();
   const { mode, toggleMode } = useThemeMode();
@@ -81,7 +88,16 @@ export function AppShell({ children }: AppShellProps) {
         withTiming(0, { duration: 80 }),
       );
     });
-  }, [lastAddedAt, lastAddSource, flyProgress, shake, flyStartX, flyStartY, flyEndX, flyEndY]);
+  }, [
+    lastAddedAt,
+    lastAddSource,
+    flyProgress,
+    shake,
+    flyStartX,
+    flyStartY,
+    flyEndX,
+    flyEndY,
+  ]);
 
   const handleNavPress = () => {
     if (!showSidebar) {
@@ -90,10 +106,22 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   const flyStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(flyProgress.value, [0, 1], [flyStartX.value, flyEndX.value]);
-    const translateY = interpolate(flyProgress.value, [0, 1], [flyStartY.value, flyEndY.value]);
+    const translateX = interpolate(
+      flyProgress.value,
+      [0, 1],
+      [flyStartX.value, flyEndX.value],
+    );
+    const translateY = interpolate(
+      flyProgress.value,
+      [0, 1],
+      [flyStartY.value, flyEndY.value],
+    );
     const scale = interpolate(flyProgress.value, [0, 0.7, 1], [1, 1, 0.2]);
-    const opacity = interpolate(flyProgress.value, [0, 0.2, 0.9, 1], [0, 1, 1, 0]);
+    const opacity = interpolate(
+      flyProgress.value,
+      [0, 0.2, 0.9, 1],
+      [0, 1, 1, 0],
+    );
 
     return {
       opacity,
@@ -121,6 +149,11 @@ export function AppShell({ children }: AppShellProps) {
             <ThemedText type="small">Wishlist</ThemedText>
           </Pressable>
         </Link>
+        <Link href="/cart" asChild>
+          <Pressable style={styles.navLink} onPress={handleNavPress}>
+            <ThemedText type="small">Cart</ThemedText>
+          </Pressable>
+        </Link>
         <Link href="/history" asChild>
           <Pressable style={styles.navLink} onPress={handleNavPress}>
             <ThemedText type="small">History</ThemedText>
@@ -136,7 +169,7 @@ export function AppShell({ children }: AppShellProps) {
       <View style={styles.toggleRow}>
         <ThemedText type="small">Dark Mode</ThemedText>
         <Switch
-          value={mode === 'dark'}
+          value={mode === "dark"}
           onValueChange={toggleMode}
           trackColor={{ false: theme.backgroundSelected, true: theme.accent }}
           thumbColor={theme.accentText}
@@ -154,7 +187,8 @@ export function AppShell({ children }: AppShellProps) {
           style={[
             styles.sidebar,
             { backgroundColor: theme.cardAlt, borderRightColor: theme.border },
-          ]}>
+          ]}
+        >
           {renderSidebarContent()}
         </Animated.View>
       )}
@@ -164,48 +198,73 @@ export function AppShell({ children }: AppShellProps) {
           style={[
             styles.navbar,
             { borderBottomColor: theme.backgroundSelected },
-          ]}>
+          ]}
+        >
           <View style={styles.navbarLeft}>
             <Pressable
-              accessibilityLabel={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
+              accessibilityLabel={
+                isSidebarOpen ? "Close navigation" : "Open navigation"
+              }
               onPress={() => setIsSidebarOpen((prev) => !prev)}
               style={[
                 styles.iconButton,
                 { borderColor: theme.border, backgroundColor: theme.card },
-              ]}>
+              ]}
+            >
               <ThemedText type="smallBold">≡</ThemedText>
             </Pressable>
-            <ThemedText type="smallBold" style={styles.brandText}>
+            <ThemedText style={styles.brandText}>
               UTShop
+              <ThemedText style={styles.brandDot}>.</ThemedText>
             </ThemedText>
           </View>
-          <Animated.View style={[styles.cart, cartShakeStyle]} ref={cartRef}>
-            {Platform.OS === 'web' || Platform.OS === 'android' ? (
-              <ThemedText style={styles.cartIcon}>🛒</ThemedText>
-            ) : (
-              <SymbolView
-                tintColor={theme.text}
-                name={{ ios: 'cart', android: 'shopping-cart', web: 'cart' }}
-                size={18}
-              />
-            )}
-            <ThemedView
-              type="backgroundSelected"
-              style={[
-                styles.badge,
-                count > 0 && styles.badgeActive,
-                count > 0 && { backgroundColor: theme.badge },
-              ]}>
-              <ThemedText type="smallBold" style={styles.badgeText}>
-                {count}
-              </ThemedText>
-            </ThemedView>
-          </Animated.View>
+          <Link href="/cart" asChild>
+            <Pressable onPress={handleNavPress}>
+              <Animated.View
+                style={[styles.cart, cartShakeStyle]}
+                ref={cartRef}
+              >
+                {Platform.OS === "web" || Platform.OS === "android" ? (
+                  <ThemedText style={styles.cartIcon}>🛒</ThemedText>
+                ) : (
+                  <SymbolView
+                    tintColor={theme.text}
+                    name={{
+                      ios: "cart",
+                      android: "shopping_cart",
+                      web: "shopping_cart",
+                    }}
+                    size={18}
+                  />
+                )}
+                <ThemedView
+                  type="backgroundSelected"
+                  style={[
+                    styles.badge,
+                    count > 0 && styles.badgeActive,
+                    count > 0 && { backgroundColor: theme.badge },
+                  ]}
+                >
+                  <ThemedText type="smallBold" style={styles.badgeText}>
+                    {count}
+                  </ThemedText>
+                </ThemedView>
+              </Animated.View>
+            </Pressable>
+          </Link>
         </ThemedView>
         {flyVisible && (
           <View pointerEvents="none" style={styles.flyLayer}>
-            <Animated.View style={[styles.flyShape, { backgroundColor: theme.accent }, flyStyle]}>
-              <View style={[styles.flyInner, { backgroundColor: theme.accentText }]} />
+            <Animated.View
+              style={[
+                styles.flyShape,
+                { backgroundColor: theme.accent },
+                flyStyle,
+              ]}
+            >
+              <View
+                style={[styles.flyInner, { backgroundColor: theme.accentText }]}
+              />
             </Animated.View>
           </View>
         )}
@@ -217,16 +276,24 @@ export function AppShell({ children }: AppShellProps) {
           <Animated.View
             entering={FadeIn.duration(150)}
             exiting={FadeOut.duration(150)}
-            style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
-            <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setIsSidebarOpen(false)} />
+            style={[styles.backdrop, { backgroundColor: theme.overlay }]}
+          >
+            <Pressable
+              style={StyleSheet.absoluteFillObject}
+              onPress={() => setIsSidebarOpen(false)}
+            />
           </Animated.View>
           <Animated.View
             entering={SlideInLeft.duration(220)}
             exiting={SlideOutLeft.duration(180)}
             style={[
               styles.overlayPanel,
-              { backgroundColor: theme.cardAlt, borderRightColor: theme.border },
-            ]}>
+              {
+                backgroundColor: theme.cardAlt,
+                borderRightColor: theme.border,
+              },
+            ]}
+          >
             <View style={styles.overlayHeader}>
               <ThemedText type="smallBold">Menu</ThemedText>
               <Pressable
@@ -235,7 +302,8 @@ export function AppShell({ children }: AppShellProps) {
                 style={[
                   styles.iconButton,
                   { borderColor: theme.border, backgroundColor: theme.card },
-                ]}>
+                ]}
+              >
                 <ThemedText type="smallBold">×</ThemedText>
               </Pressable>
             </View>
@@ -250,11 +318,11 @@ export function AppShell({ children }: AppShellProps) {
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
-    flexDirection: 'row',
-    position: 'relative',
+    flexDirection: "row",
+    position: "relative",
   },
   shellCompact: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   sidebar: {
     width: 240,
@@ -274,15 +342,15 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.two,
   },
   navbarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.two,
   },
   toggleRow: {
-    marginTop: 'auto',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    marginTop: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   main: {
     flex: 1,
@@ -291,17 +359,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
     borderBottomWidth: 1,
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   brandText: {
     letterSpacing: 0.6,
+    fontFamily: Fonts.brand,
+    fontSize: 22,
+    lineHeight: 32,
+    fontWeight: "400",
+  },
+  brandDot: {
+    fontSize: 25,
+    lineHeight: 32,
+    fontWeight: "700",
   },
   cart: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.one,
   },
   cartIcon: {
@@ -312,12 +389,11 @@ const styles = StyleSheet.create({
     minWidth: 22,
     height: 22,
     borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: Spacing.one,
   },
-  badgeActive: {
-  },
+  badgeActive: {},
   badgeText: {
     fontSize: 12,
   },
@@ -326,14 +402,14 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   flyShape: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     width: 28,
     height: 28,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   flyInner: {
     width: 12,
@@ -348,26 +424,26 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
   overlayPanel: {
     width: 260,
-    height: '100%',
+    height: "100%",
     padding: Spacing.four,
     gap: Spacing.three,
     borderRightWidth: 1,
   },
   overlayHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });

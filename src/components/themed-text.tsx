@@ -51,6 +51,8 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 600,
     lineHeight: 52,
+    fontFamily: Fonts.title,
+    letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 32,
