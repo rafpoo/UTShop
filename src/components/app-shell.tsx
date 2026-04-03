@@ -30,7 +30,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const { width } = useWindowDimensions();
   const showSidebar = Platform.OS === 'web' ? width >= 900 : width >= 720;
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(showSidebar);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const { count, lastAddedAt, lastAddSource } = useCart();
   const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
@@ -138,8 +138,8 @@ export function AppShell({ children }: AppShellProps) {
         <Switch
           value={mode === 'dark'}
           onValueChange={toggleMode}
-          trackColor={{ false: theme.backgroundSelected, true: '#3c87f7' }}
-          thumbColor={mode === 'dark' ? theme.background : theme.background}
+          trackColor={{ false: theme.backgroundSelected, true: theme.accent }}
+          thumbColor={theme.accentText}
         />
       </View>
     </>
@@ -149,9 +149,12 @@ export function AppShell({ children }: AppShellProps) {
     <ThemedView style={[styles.shell, !showSidebar && styles.shellCompact]}>
       {showSidebar && isSidebarOpen && (
         <Animated.View
-          entering={SlideInLeft.springify().damping(18).stiffness(160)}
-          exiting={SlideOutLeft.springify().damping(18).stiffness(160)}
-          style={[styles.sidebar, { backgroundColor: theme.backgroundElement }]}>
+          entering={SlideInLeft.duration(240)}
+          exiting={SlideOutLeft.duration(200)}
+          style={[
+            styles.sidebar,
+            { backgroundColor: theme.cardAlt, borderRightColor: theme.border },
+          ]}>
           {renderSidebarContent()}
         </Animated.View>
       )}
@@ -166,7 +169,10 @@ export function AppShell({ children }: AppShellProps) {
             <Pressable
               accessibilityLabel={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
               onPress={() => setIsSidebarOpen((prev) => !prev)}
-              style={[styles.iconButton, { borderColor: theme.textSecondary }]}>
+              style={[
+                styles.iconButton,
+                { borderColor: theme.border, backgroundColor: theme.card },
+              ]}>
               <ThemedText type="smallBold">≡</ThemedText>
             </Pressable>
             <ThemedText type="smallBold" style={styles.brandText}>
@@ -174,7 +180,7 @@ export function AppShell({ children }: AppShellProps) {
             </ThemedText>
           </View>
           <Animated.View style={[styles.cart, cartShakeStyle]} ref={cartRef}>
-            {Platform.OS === 'web' ? (
+            {Platform.OS === 'web' || Platform.OS === 'android' ? (
               <ThemedText style={styles.cartIcon}>🛒</ThemedText>
             ) : (
               <SymbolView
@@ -188,6 +194,7 @@ export function AppShell({ children }: AppShellProps) {
               style={[
                 styles.badge,
                 count > 0 && styles.badgeActive,
+                count > 0 && { backgroundColor: theme.badge },
               ]}>
               <ThemedText type="smallBold" style={styles.badgeText}>
                 {count}
@@ -197,8 +204,8 @@ export function AppShell({ children }: AppShellProps) {
         </ThemedView>
         {flyVisible && (
           <View pointerEvents="none" style={styles.flyLayer}>
-            <Animated.View style={[styles.flyShape, flyStyle]}>
-              <View style={styles.flyInner} />
+            <Animated.View style={[styles.flyShape, { backgroundColor: theme.accent }, flyStyle]}>
+              <View style={[styles.flyInner, { backgroundColor: theme.accentText }]} />
             </Animated.View>
           </View>
         )}
@@ -210,19 +217,25 @@ export function AppShell({ children }: AppShellProps) {
           <Animated.View
             entering={FadeIn.duration(150)}
             exiting={FadeOut.duration(150)}
-            style={styles.backdrop}>
+            style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
             <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setIsSidebarOpen(false)} />
           </Animated.View>
           <Animated.View
-            entering={SlideInLeft.springify().damping(18).stiffness(160)}
-            exiting={SlideOutLeft.springify().damping(18).stiffness(160)}
-            style={[styles.overlayPanel, { backgroundColor: theme.backgroundElement }]}>
+            entering={SlideInLeft.duration(220)}
+            exiting={SlideOutLeft.duration(180)}
+            style={[
+              styles.overlayPanel,
+              { backgroundColor: theme.cardAlt, borderRightColor: theme.border },
+            ]}>
             <View style={styles.overlayHeader}>
               <ThemedText type="smallBold">Menu</ThemedText>
               <Pressable
                 accessibilityLabel="Close navigation"
                 onPress={() => setIsSidebarOpen(false)}
-                style={[styles.iconButton, { borderColor: theme.textSecondary }]}>
+                style={[
+                  styles.iconButton,
+                  { borderColor: theme.border, backgroundColor: theme.card },
+                ]}>
                 <ThemedText type="smallBold">×</ThemedText>
               </Pressable>
             </View>
@@ -247,6 +260,7 @@ const styles = StyleSheet.create({
     width: 240,
     padding: Spacing.four,
     gap: Spacing.three,
+    borderRightWidth: 1,
   },
   sidebarTitle: {
     letterSpacing: 0.3,
@@ -303,7 +317,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
   },
   badgeActive: {
-    backgroundColor: '#E5484D',
   },
   badgeText: {
     fontSize: 12,
@@ -319,7 +332,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: '#3c87f7',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -327,7 +339,6 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 4,
-    backgroundColor: '#ffffff',
   },
   content: {
     flex: 1,
@@ -346,13 +357,13 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
   },
   overlayPanel: {
     width: 260,
     height: '100%',
     padding: Spacing.four,
     gap: Spacing.three,
+    borderRightWidth: 1,
   },
   overlayHeader: {
     flexDirection: 'row',

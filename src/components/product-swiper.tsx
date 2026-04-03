@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ProductCard } from '@/components/product-card';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { Product } from '@/types/product';
 
 interface ProductSwiperProps {
@@ -9,6 +11,7 @@ interface ProductSwiperProps {
 }
 
 export function ProductSwiper({ products }: ProductSwiperProps) {
+  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = React.useRef<ScrollView>(null);
   const isUserScrolling = useRef(false);
@@ -95,7 +98,11 @@ export function ProductSwiper({ products }: ProductSwiperProps) {
         {products.map((_, index) => (
           <View
             key={index}
-            style={[styles.dot, index === currentIndex && styles.activeDot]}
+            style={[
+              styles.dot,
+              { backgroundColor: theme.dot },
+              index === currentIndex && { backgroundColor: theme.accent },
+            ]}
           />
         ))}
       </View>
@@ -105,7 +112,8 @@ export function ProductSwiper({ products }: ProductSwiperProps) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 320,
+    height: 420,
+    paddingVertical: Spacing.five,
   },
   scrollView: {
     flex: 1,
@@ -113,6 +121,8 @@ const styles = StyleSheet.create({
   slide: {
     width: 300,
     justifyContent: 'center',
+    paddingVertical: Spacing.two,
+    marginHorizontal: Spacing.two,
   },
   pagination: {
     flexDirection: 'row',
@@ -124,10 +134,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.2)',
     marginHorizontal: 3,
-  },
-  activeDot: {
-    backgroundColor: '#000000',
   },
 });

@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 interface ProductCardProps {
   name: string;
@@ -14,9 +15,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ name, description, price, image }: ProductCardProps) {
+  const theme = useTheme();
+
   return (
-    <ThemedView style={styles.card}>
-      <Image source={image} style={styles.image} contentFit="contain" />
+    <ThemedView type="card" style={[styles.card, { borderColor: theme.border }]}>
+      <Image source={image} style={[styles.image, { backgroundColor: theme.imagePlaceholder }]} contentFit="contain" />
       <ThemedView style={styles.content}>
         <ThemedText type="subtitle" style={styles.name}>{name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.description}>
@@ -34,12 +37,14 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    borderWidth: 1,
+    borderRadius: Spacing.three,
   },
   image: {
     width: '100%',
     height: 150,
     borderRadius: Spacing.two,
-    backgroundColor: '#f0f0f0',
   },
   content: {
     paddingTop: Spacing.two,

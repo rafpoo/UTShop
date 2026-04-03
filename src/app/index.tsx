@@ -30,6 +30,11 @@ export default function HomeScreen() {
   const gridProducts = products.slice(0, 10);
   const baseDelay = 120;
   const [animationSeed, setAnimationSeed] = React.useState(0);
+  const [gridWidth, setGridWidth] = React.useState(0);
+
+  const cardWidth = gridWidth > 0
+    ? (gridWidth - Spacing.three) / 2
+    : undefined;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -76,7 +81,9 @@ export default function HomeScreen() {
             </View>
           </Animated.View>
 
-          <View style={styles.productGrid}>
+          <View
+            style={styles.productGrid}
+            onLayout={(event) => setGridWidth(event.nativeEvent.layout.width)}>
             {gridProducts.map((product, index) => {
               const isInCart = cartIds.includes(product.id);
               const isWishlisted = wishlistIds.includes(product.id);
@@ -84,10 +91,22 @@ export default function HomeScreen() {
               return (
                 <Animated.View
                   key={`${product.id}-${animationSeed}`}
-                  style={styles.productCardWrapper}
+                  style={[styles.productCardWrapper, cardWidth ? { width: cardWidth } : null]}
                   entering={FadeInDown.duration(450).delay(baseDelay * 4 + index * 90)}>
-                  <ThemedView type="backgroundElement" style={styles.productCard}>
-                    <Image source={product.image} style={styles.productImage} contentFit="contain" />
+                  <ThemedView
+                    type="card"
+                    style={[
+                      styles.productCard,
+                      { borderColor: theme.border },
+                    ]}>
+                    <Image
+                      source={product.image}
+                      style={[
+                        styles.productImage,
+                        { backgroundColor: theme.imagePlaceholder },
+                      ]}
+                      contentFit="contain"
+                    />
                     <ThemedText type="smallBold" style={styles.productName}>
                       {product.name}
                     </ThemedText>
@@ -156,24 +175,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   productGrid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.three,
     justifyContent: 'space-between',
   },
   productCardWrapper: {
-    flexBasis: '48%',
+    width: '48%',
   },
   productCard: {
     padding: Spacing.three,
     borderRadius: Spacing.three,
     gap: Spacing.one,
+    borderWidth: 1,
   },
   productImage: {
     width: '100%',
     height: 120,
     borderRadius: Spacing.two,
-    backgroundColor: '#f0f0f0',
   },
   productName: {
     marginTop: Spacing.one,
@@ -239,11 +259,11 @@ function AddToCartButton({
       style={[
         styles.iconButton,
         {
-          backgroundColor: isActive ? theme.backgroundSelected : theme.background,
-          borderColor: theme.textSecondary,
+          backgroundColor: isActive ? theme.accent : theme.card,
+          borderColor: isActive ? theme.accent : theme.border,
         },
       ]}>
-      <ThemedText type="smallBold">+</ThemedText>
+      <ThemedText type="smallBold" themeColor={isActive ? 'accentText' : 'text'}>+</ThemedText>
     </Pressable>
   );
 }
@@ -289,12 +309,12 @@ function WishlistButton({
       style={[
         styles.iconButton,
         {
-          backgroundColor: isActive ? theme.backgroundSelected : theme.background,
-          borderColor: theme.textSecondary,
+          backgroundColor: isActive ? theme.cardAlt : theme.card,
+          borderColor: isActive ? theme.accent : theme.border,
         },
       ]}>
       <Animated.View style={animatedStyle}>
-        <ThemedText style={styles.starIcon}>
+        <ThemedText style={styles.starIcon} themeColor={isActive ? 'accent' : 'text'}>
           {isActive ? '★' : '☆'}
         </ThemedText>
       </Animated.View>
