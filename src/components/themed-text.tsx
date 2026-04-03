@@ -10,10 +10,11 @@ export type ThemedTextProps = TextProps & {
 
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  const flattenedStyle = StyleSheet.flatten(style);
 
   return (
     <Text
-      style={[
+      style={StyleSheet.flatten([
         { color: theme[themeColor ?? 'text'] },
         type === 'default' && styles.default,
         type === 'title' && styles.title,
@@ -24,8 +25,8 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'linkPrimary' && styles.linkPrimary,
         type === 'linkPrimary' && { color: theme.accent },
         type === 'code' && styles.code,
-        style,
-      ]}
+        flattenedStyle,
+      ])}
       {...rest}
     />
   );
